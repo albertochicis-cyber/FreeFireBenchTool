@@ -9,17 +9,27 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - run: unzip -o FreeFireBenchTool.zip
+      - run: unzip -o FreeFireBenchTool.zip -d src_out
       - uses: actions/setup-java@v4
         with:
           distribution: temurin
           java-version: "17"
       - run: |
+          if [ -d src_out/FreeFireBenchTool ]; then
+            cd src_out/FreeFireBenchTool
+          else
+            cd src_out
+          fi
           if [ -f app/build.gradle.kts ] && ! grep -q "org.jetbrains.kotlin.plugin.compose" app/build.gradle.kts; then
             printf '\napply(plugin = "org.jetbrains.kotlin.plugin.compose")\n' >> app/build.gradle.kts
           fi
-          chmod +x gradlew && ./gradlew assembleDebug
+          if [ -f ./gradlew ]; then
+            chmod +x ./gradlew
+            ./gradlew assembleDebug
+          else
+            gradle assembleDebug
+          fi
       - uses: actions/upload-artifact@v4
         with:
           name: debug-apk
-          path: app/build/outputs/apk/debug/*.apk
+          path: "**/app/build/outputs/apk/debug/*.apk"
