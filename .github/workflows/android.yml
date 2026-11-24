@@ -23,6 +23,21 @@ jobs:
             fi
           fi
 
+      - name: Enable Compose Compiler plugin for Kotlin 2.0+
+        run: |
+          if [ -f settings.gradle.kts ] && ! grep -q "org.jetbrains.kotlin.plugin.compose" settings.gradle.kts; then
+            cat << 'EOF' >> settings.gradle.kts
+
+gradle.beforeProject { project ->
+    project.plugins.withId("com.android.application") {
+        if (project.extensions.findByName("kotlin") != null) {
+            project.plugins.apply("org.jetbrains.kotlin.plugin.compose")
+        }
+    }
+}
+EOF
+          fi
+
       - name: Set up JDK 17
         uses: actions/setup-java@v4
         with:
