@@ -1,9 +1,9 @@
-name: Build Debug APK
+ name: Build Debug APK
 
 on:
   workflow_dispatch:
   push:
-    branches: [ "**" ]
+    branches: [ main ]
 
 jobs:
   build:
@@ -31,8 +31,8 @@ jobs:
 
       - name: Build Debug APK
         run: |
-          if [ -f settings.gradle.kts ]; then
-            printf '\ngradle.beforeProject { p -> p.plugins.withId("com.android.application") { if (p.extensions.findByName("kotlin") != null) p.plugins.apply("org.jetbrains.kotlin.plugin.compose") } }\n' >> settings.gradle.kts
+          if [ -f app/build.gradle.kts ] && ! grep -q "org.jetbrains.kotlin.plugin.compose" app/build.gradle.kts; then
+            printf '\napply(plugin = "org.jetbrains.kotlin.plugin.compose")\n' >> app/build.gradle.kts
           fi
           if [ -f ./gradlew ]; then
             chmod +x ./gradlew
